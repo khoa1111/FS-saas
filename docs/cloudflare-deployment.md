@@ -31,6 +31,7 @@ Use these settings when Cloudflare requires build and deploy commands:
 
 The Worker uses `[assets] directory = "./dist"` and `not_found_handling = "single-page-application"`, so direct links inside the React app fall back to `index.html`.
 The project declares Vite `^6.0.0` because Cloudflare Workers automatic configuration rejects Vite 5.x.
+The repo also sets `package-lock=false` in `.npmrc` so Cloudflare does not reuse stale cached Vite/esbuild lock metadata during `npm clean-install`.
 
 Do not add D1/R2 setup commands to build or deploy commands. They are one-time provisioning operations and are not idempotent (`d1 create` and `r2 bucket create` fail after resources already exist).
 
