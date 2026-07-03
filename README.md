@@ -89,6 +89,7 @@ npx wrangler versions upload
 ```
 
 Use `/` as the path/root directory. The `wrangler.toml` file points Wrangler at the Vite output in `dist` and serves it as a single-page app.
+The project declares Vite `^6.0.0` because Cloudflare Workers automatic configuration rejects Vite 5.x.
 
 Do **not** paste D1/R2 provisioning commands into build or deploy commands; those are one-time setup steps and will fail on later builds when resources already exist.
 
