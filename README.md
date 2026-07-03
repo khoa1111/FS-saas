@@ -75,20 +75,26 @@ via your profile after first login). Other env vars: `PORT`, `JWT_SECRET`,
 
 ## Cloudflare hosting path
 
-This repo now includes a Cloudflare deployment scaffold:
-
-- `wrangler.toml` publishes the Vite build output in `dist` and declares bindings for D1 (`DB`) and R2 (`ASSETS_BUCKET`).
-- `cloudflare/d1-schema.sql` mirrors the local SQLite business tables for D1 bootstrap.
-- `docs/cloudflare-deployment.md` documents the Worker/Pages, D1, R2, Durable Objects, and Google Sheets migration plan.
-
-Static client deployment starts with:
+Cloudflare Pages should build this project with **only** the production build command:
 
 ```bash
 npm run build
+```
+
+Use `dist` as the build output directory. Do **not** paste D1/R2 provisioning commands into the Pages build command; those are one-time setup steps and will fail on later builds when resources already exist.
+
+This repo includes a Cloudflare deployment scaffold:
+
+- `wrangler.toml` documents the safe Pages build configuration for the static 3D React client.
+- `cloudflare/d1-schema.sql` mirrors the local SQLite business tables for D1 bootstrap.
+- `docs/cloudflare-deployment.md` documents the Worker/Pages, D1, R2, Durable Objects, and Google Sheets migration plan.
+
+Run one-time provisioning locally or in an authenticated admin terminal, then add the real resource IDs/bindings in Cloudflare:
+
+```bash
 npx wrangler d1 create felic-studio-os
 npx wrangler d1 execute felic-studio-os --file cloudflare/d1-schema.sql --remote
 npx wrangler r2 bucket create felic-studio-assets
-npx wrangler pages deploy dist --project-name felic-studio-os
 ```
 
 The existing Express server remains available for local/full-stack operation while the API is ported to Workers.

@@ -4,9 +4,9 @@ Felic Studio OS is designed as a sim-office SaaS: Vite/React renders the 3D offi
 
 ## Current deployable surface
 
-- `wrangler.toml` deploys the built React office from `dist` to Cloudflare Pages/Workers assets.
+- `wrangler.toml` keeps the Pages build safe and static: build with `npm run build`, output `dist`.
 - `cloudflare/d1-schema.sql` mirrors the local SQLite schema so the business data model is ready for Cloudflare D1.
-- R2 is reserved for uploaded documents and production creative assets through the `ASSETS_BUCKET` binding.
+- R2 is reserved for uploaded documents and production creative assets; add the `ASSETS_BUCKET` binding after the bucket exists.
 
 ## Cloudflare target architecture
 
@@ -19,17 +19,27 @@ Felic Studio OS is designed as a sim-office SaaS: Vite/React renders the 3D offi
 | Secrets | environment variables/settings table | Wrangler secrets + D1 settings rows |
 | Google Sheets | REST service-account JWT | Worker `fetch` + secrets for private key |
 
-## First Cloudflare setup
+## Cloudflare Pages build settings
+
+Use these settings in Cloudflare Pages:
+
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Root directory: repository root
+
+Do not add D1/R2 setup commands to the Pages build command. They are one-time provisioning operations and are not idempotent (`d1 create` and `r2 bucket create` fail after resources already exist).
+
+## One-time Cloudflare setup
+
+Run these commands locally or in an authenticated admin terminal, not in the Pages build command:
 
 ```bash
-npm run build
 npx wrangler d1 create felic-studio-os
 npx wrangler d1 execute felic-studio-os --file cloudflare/d1-schema.sql --remote
 npx wrangler r2 bucket create felic-studio-assets
-npx wrangler pages deploy dist --project-name felic-studio-os
 ```
 
-After creating D1, replace `database_id` in `wrangler.toml` with the ID returned by Cloudflare. Store sensitive values with Wrangler secrets rather than committing them:
+After creating D1/R2, configure the real D1 and R2 bindings in the Cloudflare dashboard or extend `wrangler.toml` with actual resource IDs. Store sensitive values with Wrangler secrets rather than committing them:
 
 ```bash
 npx wrangler secret put JWT_SECRET
