@@ -1,16 +1,30 @@
 name = "felic-studio-os"
-main = "src/worker.ts"
 compatibility_date = "2026-07-03"
+pages_build_output_dir = "dist"
 
-[assets]
-directory = "./dist"
-binding = "ASSETS"
-not_found_handling = "single-page-application"
-
-# Cloudflare Workers build settings:
+# Cloudflare Pages build settings:
 #   Build command: npm run build
-#   Deploy command: npx wrangler deploy
-#   Non-production branch deploy command: npx wrangler versions upload
+#   Build output directory: dist
 #
-# Do not run one-time provisioning commands (D1 create, R2 create, schema import)
-# as build or deploy commands. Configure D1/R2 bindings after provisioning them.
+# Do not run one-time provisioning commands (D1 create, R2 create, schema import,
+# or pages deploy) as the Pages build command. Configure D1/R2 bindings in the
+# Cloudflare dashboard or add real resource IDs after provisioning them.
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+# Static 3D React client deploys to Cloudflare Pages/Workers assets.
+# The current Express + SQLite realtime API remains runnable via `npm start`;
+# use docs/cloudflare-deployment.md for the planned D1/R2/Durable Objects cutover.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "felic-studio-os"
+database_id = "f8665383-3f14-4be0-9f48-81fe68fad016"
+
+[[r2_buckets]]
+binding = "ASSETS_BUCKET"
+bucket_name = "felic-studio-assets"
+
+[vars]
+APP_NAME = "Felic Studio OS"
+INVITE_ORIGIN = "https://felic-studio-os.pages.dev"
