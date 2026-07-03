@@ -1,6 +1,6 @@
 name = "felic-studio-os"
 compatibility_date = "2026-07-03"
-pages_build_output_dir = "dist"
+#pages_build_output_dir = "dist"
 
 # Cloudflare Pages build settings:
 #   Build command: npm run build
