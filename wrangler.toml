@@ -1,0 +1,11 @@
+name = "felic-studio-os"
+compatibility_date = "2026-07-03"
+pages_build_output_dir = "dist"
+
+# Cloudflare Pages build settings:
+#   Build command: npm run build
+#   Build output directory: dist
+#
+# Do not run one-time provisioning commands (D1 create, R2 create, schema import,
+# or pages deploy) as the Pages build command. Configure D1/R2 bindings in the
+# Cloudflare dashboard or add real resource IDs after provisioning them.

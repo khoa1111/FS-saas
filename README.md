@@ -72,3 +72,29 @@ via your profile after first login). Other env vars: `PORT`, `JWT_SECRET`,
 - **E** — work at the highlighted room
 - **ESC** — close the module window
 - chat box (bottom right) — talk to the office
+
+## Cloudflare hosting path
+
+Cloudflare Pages should build this project with **only** the production build command:
+
+```bash
+npm run build
+```
+
+Use `dist` as the build output directory. Do **not** paste D1/R2 provisioning commands into the Pages build command; those are one-time setup steps and will fail on later builds when resources already exist.
+
+This repo includes a Cloudflare deployment scaffold:
+
+- `wrangler.toml` documents the safe Pages build configuration for the static 3D React client.
+- `cloudflare/d1-schema.sql` mirrors the local SQLite business tables for D1 bootstrap.
+- `docs/cloudflare-deployment.md` documents the Worker/Pages, D1, R2, Durable Objects, and Google Sheets migration plan.
+
+Run one-time provisioning locally or in an authenticated admin terminal, then add the real resource IDs/bindings in Cloudflare:
+
+```bash
+npx wrangler d1 create felic-studio-os
+npx wrangler d1 execute felic-studio-os --file cloudflare/d1-schema.sql --remote
+npx wrangler r2 bucket create felic-studio-assets
+```
+
+The existing Express server remains available for local/full-stack operation while the API is ported to Workers.
