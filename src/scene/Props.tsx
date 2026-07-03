@@ -30,15 +30,21 @@ function StockScreen({ color, w = 2.6, h = 1.5 }: { color: string; w?: number; h
     if (frame.current % 5 !== 0) return;
     values.push(Math.max(14, Math.min(120, values[values.length - 1] + (Math.random() - 0.48) * 14)));
     values.shift();
-    // dark chart surface #171922 with validated dark-mode series colors
-    ctx.fillStyle = "#171922";
+    // blueprint screen: cobalt grid, hot line with square markers
+    ctx.fillStyle = "#1b2ac2";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "rgba(255,255,255,0.07)";
+    ctx.strokeStyle = "rgba(255,255,255,0.14)";
     ctx.lineWidth = 1;
     for (let y = 24; y < canvas.height; y += 26) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+    for (let x = 16; x < canvas.width; x += 26) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
       ctx.stroke();
     }
     const step = canvas.width / (values.length - 1);
@@ -49,22 +55,34 @@ function StockScreen({ color, w = 2.6, h = 1.5 }: { color: string; w?: number; h
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     });
     ctx.strokeStyle = color;
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 3;
     ctx.stroke();
     ctx.lineTo(canvas.width, canvas.height);
     ctx.lineTo(0, canvas.height);
     ctx.closePath();
     const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    g.addColorStop(0, color + "55");
+    g.addColorStop(0, color + "3d");
     g.addColorStop(1, color + "00");
     ctx.fillStyle = g;
     ctx.fill();
+    // square markers every few points + crosshair on the last one
+    ctx.fillStyle = "#ffffff";
+    values.forEach((v, i) => {
+      if (i % 8 === 0) ctx.fillRect(i * step - 2, canvas.height - v - 2, 4, 4);
+    });
+    const lastX = canvas.width;
+    const lastY = canvas.height - values[values.length - 1];
+    ctx.setLineDash([3, 4]);
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, lastY); ctx.lineTo(lastX, lastY); ctx.stroke();
+    ctx.setLineDash([]);
     const last = values[values.length - 1];
     const delta = last - values[values.length - 2];
     ctx.font = "700 13px monospace";
     ctx.fillStyle = "#ffffff";
     ctx.fillText(last.toFixed(2), 10, 20);
-    ctx.fillStyle = delta >= 0 ? "#28d17c" : "#ff6a6a";
+    ctx.fillStyle = color;
     ctx.fillText((delta >= 0 ? "▲ " : "▼ ") + Math.abs(delta).toFixed(2), 70, 20);
     texture.needsUpdate = true;
   });
@@ -88,21 +106,21 @@ export function FinanceRoom({ position }: { position: [number, number, number] }
     <group position={position}>
       {/* three big angled screens facing the camera */}
       <group position={[-1.2, 1.6, -2.6]} rotation={[0, 0.5, 0]}>
-        <StockScreen color="#4d6bff" />
+        <StockScreen color="#ff7a1a" />
         <mesh position={[0, -0.95, 0]}>
           <boxGeometry args={[0.14, 0.5, 0.14]} />
           <meshStandardMaterial color={STEEL} />
         </mesh>
       </group>
       <group position={[-2.6, 1.5, 0.6]} rotation={[0, 0.9, 0]}>
-        <StockScreen color="#d95926" w={2.2} h={1.3} />
+        <StockScreen color="#ffffff" w={2.2} h={1.3} />
         <mesh position={[0, -0.85, 0]}>
           <boxGeometry args={[0.14, 0.5, 0.14]} />
           <meshStandardMaterial color={STEEL} />
         </mesh>
       </group>
       <group position={[1.4, 1.5, -0.6]} rotation={[0, 0.2, 0]}>
-        <StockScreen color="#28d17c" w={2.0} h={1.2} />
+        <StockScreen color="#ffb35c" w={2.0} h={1.2} />
         <mesh position={[0, -0.8, 0]}>
           <boxGeometry args={[0.14, 0.5, 0.14]} />
           <meshStandardMaterial color={STEEL} />
@@ -200,7 +218,7 @@ export function HrRoom({ position }: { position: [number, number, number] }) {
       </mesh>
       <mesh position={[0, 0.95, 0.28]}>
         <sphereGeometry args={[0.05, 10, 10]} />
-        <meshStandardMaterial ref={light} color="#17b26a" emissive="#17b26a" emissiveIntensity={1.8} toneMapped={false} />
+        <meshStandardMaterial ref={light} color="#ff7a1a" emissive="#ff7a1a" emissiveIntensity={1.8} toneMapped={false} />
       </mesh>
       {/* card slot */}
       <mesh position={[0, 0.72, 0.27]}>
@@ -287,7 +305,7 @@ export function ProjectsRoom({ position }: { position: [number, number, number] 
             {[0.3, 0, -0.3].slice(0, 3 - col).map((y, i) => (
               <mesh key={i} position={[x, y + 0.1, 0.05]}>
                 <planeGeometry args={[0.44, 0.2]} />
-                <meshStandardMaterial color={[COBALT, ORANGE, "#17b26a"][(col + i) % 3]} />
+                <meshStandardMaterial color={[COBALT, ORANGE, "#ffffff"][(col + i) % 3]} />
               </mesh>
             ))}
           </group>
@@ -348,7 +366,7 @@ export function WorkflowRoom({ position }: { position: [number, number, number] 
 /* ---------- CRM: folders & files lounge ---------- */
 
 export function CrmRoom({ position }: { position: [number, number, number] }) {
-  const folderColors = [COBALT, ORANGE, "#17b26a", "#7b5cff", "#e8b114"];
+  const folderColors = [COBALT, ORANGE, "#ffffff", "#16249e", "#ff9a4d"];
   return (
     <group position={position}>
       {/* shelf rack */}
@@ -458,7 +476,7 @@ export function Desk({ position, rotation = 0 }: { position: [number, number, nu
     <group position={position} rotation={[0, rotation, 0]}>
       <mesh position={[0, 0.55, 0]} castShadow>
         <boxGeometry args={[1.8, 0.1, 0.9]} />
-        <meshStandardMaterial color="#b98d5f" roughness={0.7} />
+        <meshStandardMaterial color="#f4f5f9" roughness={0.45} />
       </mesh>
       {[-0.8, 0.8].map((x) => (
         <mesh key={x} position={[x, 0.27, 0]}>
@@ -523,11 +541,11 @@ export function Plant({ position }: { position: [number, number, number] }) {
       </mesh>
       <mesh position={[0, 0.62, 0]}>
         <sphereGeometry args={[0.32, 12, 12]} />
-        <meshStandardMaterial color="#2e9e5b" roughness={0.8} />
+        <meshStandardMaterial color="#1e7449" roughness={0.85} />
       </mesh>
       <mesh position={[0.14, 0.85, 0.05]}>
         <sphereGeometry args={[0.2, 10, 10]} />
-        <meshStandardMaterial color="#3cb56d" roughness={0.8} />
+        <meshStandardMaterial color="#278a58" roughness={0.85} />
       </mesh>
     </group>
   );
