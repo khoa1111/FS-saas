@@ -39,32 +39,44 @@ a module.
   WebSockets for everyone in the room) and a reaction-time race with a
   persistent leaderboard.
 
-## Stack
+## Stack (Cloudflare Workers edition)
 
 - **Client**: Vite + React + TypeScript, three.js via @react-three/fiber
   (isometric orthographic camera, WASD movement, animated props), zustand.
   Rendering: procedural environment lighting, contact + blob shadows, and an
   N8AO + bloom + vignette post stack. Typography is bundled (Archivo Black
   display, Space Grotesk UI, JetBrains Mono micro-labels) — no CDN fetches.
-- **Server**: Express + better-sqlite3 (WAL), JWT auth, `ws` for presence/games,
-  Google Sheets REST with a hand-rolled service-account JWT (no SDK).
+- **Server**: Cloudflare Workers — Hono for the REST API, **D1** (SQLite) for
+  data, a **Durable Object** (`OfficeRoom`) for realtime presence/chat/games
+  over WebSockets, WebCrypto for JWT (HS256) + PBKDF2 password hashing, and
+  Google Sheets REST signed with WebCrypto RS256 (no SDK). Static assets are
+  served by the Workers assets pipeline with SPA fallback.
 - **Design**: charts follow a CVD-validated palette (cobalt `#2447f0` /
   orange `#eb6834` on white; `#4d6bff` / `#d95926` on the dark market screens).
 
-## Run it
+## Run it locally
 
 ```bash
 npm install
-npm run dev        # server :4000 + vite :5173 (proxied)
-# or production:
-npm run build
-npm start          # serves the built client on :4000
+npm run dev        # vite build + wrangler dev on http://localhost:8787
+# UI hot-reload while wrangler dev runs: npm run dev:ui (vite :5173, proxied)
 ```
 
-First boot seeds an admin account — **admin@felic.studio / felic-admin**
-(override with `ADMIN_EMAIL` / `ADMIN_PASSWORD` env vars; change the password
-via your profile after first login). Other env vars: `PORT`, `JWT_SECRET`,
-`DATA_DIR` (SQLite location, defaults to `./data`).
+`wrangler dev` runs everything locally (miniflare: local D1 + Durable
+Objects) — no Cloudflare account needed for development.
+
+## Deploy to Cloudflare
+
+```bash
+npx wrangler d1 create felic-studio-os   # paste database_id into wrangler.toml
+npx wrangler secret put JWT_SECRET       # any long random string
+npm run deploy
+```
+
+The first request seeds the admin account — **admin@felic.studio /
+felic-admin** (change `ADMIN_PASSWORD` in `wrangler.toml` vars, or set a
+secret of the same name, before first deploy; change the password via your
+profile after first login).
 
 ## Controls
 

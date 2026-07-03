@@ -1,0 +1,39 @@
+# Felic Studio OS on Cloudflare Workers
+#
+# One-time setup:
+#   npx wrangler d1 create felic-studio-os     → paste database_id below
+#   npx wrangler secret put JWT_SECRET         → any long random string
+# Deploy:
+#   npm run deploy
+#
+# The admin account is seeded on first request (ADMIN_EMAIL / ADMIN_PASSWORD
+# vars below, or override with secrets of the same name).
+
+name = "felic-studio-os"
+main = "worker/index.ts"
+compatibility_date = "2026-06-01"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/ws"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "felic-studio-os"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[durable_objects]
+bindings = [{ name = "OFFICE", class_name = "OfficeRoom" }]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["OfficeRoom"]
+
+[vars]
+ADMIN_EMAIL = "admin@felic.studio"
+ADMIN_PASSWORD = "felic-admin"
+
+[observability]
+enabled = true

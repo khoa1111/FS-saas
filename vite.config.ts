@@ -5,9 +5,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    // `npm run dev:ui` proxies to `wrangler dev` (default port 8787)
     proxy: {
-      "/api": "http://localhost:4000",
-      "/ws": { target: "ws://localhost:4000", ws: true }
+      "/api": "http://localhost:8787",
+      "/ws": { target: "ws://localhost:8787", ws: true }
     }
   },
   build: {

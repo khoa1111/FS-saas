@@ -1,21 +1,33 @@
-// Google Sheets sync without the heavyweight googleapis SDK: we sign a
-// service-account JWT with node:crypto and talk to the Sheets REST API.
-//
-// Configure via the admin console (stored in the settings table):
+// Google Sheets sync on WebCrypto: sign a service-account JWT (RS256) and
+// talk to the Sheets REST API. Configured via the settings table:
 //   sheets.service_account — full service-account JSON key
 //   sheets.spreadsheet_id  — target spreadsheet id
-// The spreadsheet must be shared with the service account's client_email.
 
-import { createSign } from "node:crypto";
-import { getSetting } from "./db.ts";
+import { getSetting } from "./db";
+import type { Env } from "./env";
 
 interface ServiceAccount {
   client_email: string;
   private_key: string;
 }
 
-function b64url(input: Buffer | string): string {
-  return Buffer.from(input).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const enc = new TextEncoder();
+
+function b64url(buf: ArrayBuffer | Uint8Array | string): string {
+  let bytes: Uint8Array;
+  if (typeof buf === "string") bytes = enc.encode(buf);
+  else bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function pemToArrayBuffer(pem: string): ArrayBuffer {
+  const body = pem.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "");
+  const raw = atob(body);
+  const bytes = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+  return bytes.buffer;
 }
 
 async function accessToken(sa: ServiceAccount): Promise<string> {
@@ -30,10 +42,15 @@ async function accessToken(sa: ServiceAccount): Promise<string> {
       exp: now + 3600
     })
   );
-  const signer = createSign("RSA-SHA256");
-  signer.update(`${header}.${claims}`);
-  const signature = b64url(signer.sign(sa.private_key));
-  const jwt = `${header}.${claims}.${signature}`;
+  const key = await crypto.subtle.importKey(
+    "pkcs8",
+    pemToArrayBuffer(sa.private_key),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, enc.encode(`${header}.${claims}`));
+  const jwt = `${header}.${claims}.${b64url(sig)}`;
 
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -48,9 +65,9 @@ async function accessToken(sa: ServiceAccount): Promise<string> {
   return data.access_token;
 }
 
-function config(): { sa: ServiceAccount; spreadsheetId: string } {
-  const saJson = getSetting("sheets.service_account");
-  const spreadsheetId = getSetting("sheets.spreadsheet_id");
+async function config(env: Env): Promise<{ sa: ServiceAccount; spreadsheetId: string }> {
+  const saJson = await getSetting(env, "sheets.service_account");
+  const spreadsheetId = await getSetting(env, "sheets.spreadsheet_id");
   if (!saJson || !spreadsheetId) {
     throw new Error("Google Sheets is not configured. Set the service account key and spreadsheet id in Admin → Integrations.");
   }
@@ -87,8 +104,8 @@ async function ensureTab(token: string, spreadsheetId: string, title: string) {
 }
 
 /** Overwrite the tab named `tab` with header + rows. */
-export async function pushRows(tab: string, header: string[], rows: (string | number | null)[][]) {
-  const { sa, spreadsheetId } = config();
+export async function pushRows(env: Env, tab: string, header: string[], rows: (string | number | null)[][]) {
+  const { sa, spreadsheetId } = await config(env);
   const token = await accessToken(sa);
   await ensureTab(token, spreadsheetId, tab);
   await api(token, spreadsheetId, `/values/${encodeURIComponent(tab)}:clear`, { method: "POST", body: "{}" });
@@ -100,8 +117,8 @@ export async function pushRows(tab: string, header: string[], rows: (string | nu
 }
 
 /** Read all rows from `tab`; first row is treated as the header. */
-export async function pullRows(tab: string): Promise<{ header: string[]; rows: string[][] }> {
-  const { sa, spreadsheetId } = config();
+export async function pullRows(env: Env, tab: string): Promise<{ header: string[]; rows: string[][] }> {
+  const { sa, spreadsheetId } = await config(env);
   const token = await accessToken(sa);
   const data = (await api(token, spreadsheetId, `/values/${encodeURIComponent(tab)}`)) as { values?: string[][] };
   const values = data.values || [];
@@ -109,6 +126,6 @@ export async function pullRows(tab: string): Promise<{ header: string[]; rows: s
   return { header: values[0], rows: values.slice(1) };
 }
 
-export function sheetsConfigured(): boolean {
-  return !!(getSetting("sheets.service_account") && getSetting("sheets.spreadsheet_id"));
+export async function sheetsConfigured(env: Env): Promise<boolean> {
+  return !!(await getSetting(env, "sheets.service_account")) && !!(await getSetting(env, "sheets.spreadsheet_id"));
 }

@@ -1,4 +1,4 @@
-// Generic CRUD registry: each business module maps REST resources onto SQLite
+// Generic CRUD registry: each business module maps REST resources onto D1
 // tables with a whitelist of writable columns and the room that guards access.
 
 export interface ResourceDef {
