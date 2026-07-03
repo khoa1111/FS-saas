@@ -75,19 +75,29 @@ via your profile after first login). Other env vars: `PORT`, `JWT_SECRET`,
 
 ## Cloudflare hosting path
 
-Cloudflare Pages should build this project with **only** the production build command:
+If Cloudflare asks for both a build command and a deploy command, use the Workers Static Assets flow:
 
 ```bash
+# Build command
 npm run build
+
+# Deploy command
+npx wrangler deploy
+
+# Non-production branch deploy command
+npx wrangler versions upload
 ```
 
-Use `dist` as the build output directory. Do **not** paste D1/R2 provisioning commands into the Pages build command; those are one-time setup steps and will fail on later builds when resources already exist.
+Use `/` as the path/root directory. The `wrangler.toml` file points Wrangler at the Vite output in `dist` and serves it as a single-page app.
+
+Do **not** paste D1/R2 provisioning commands into build or deploy commands; those are one-time setup steps and will fail on later builds when resources already exist.
 
 This repo includes a Cloudflare deployment scaffold:
 
-- `wrangler.toml` documents the safe Pages build configuration for the static 3D React client.
+- `wrangler.toml` deploys the static 3D React client with Workers Static Assets.
+- `src/worker.ts` serves built assets and returns a clear placeholder for `/api/*` and `/ws` until the backend migration is complete.
 - `cloudflare/d1-schema.sql` mirrors the local SQLite business tables for D1 bootstrap.
-- `docs/cloudflare-deployment.md` documents the Worker/Pages, D1, R2, Durable Objects, and Google Sheets migration plan.
+- `docs/cloudflare-deployment.md` documents the Workers, D1, R2, Durable Objects, and Google Sheets migration plan.
 
 Run one-time provisioning locally or in an authenticated admin terminal, then add the real resource IDs/bindings in Cloudflare:
 

@@ -4,7 +4,8 @@ Felic Studio OS is designed as a sim-office SaaS: Vite/React renders the 3D offi
 
 ## Current deployable surface
 
-- `wrangler.toml` keeps the Pages build safe and static: build with `npm run build`, output `dist`.
+- `wrangler.toml` deploys the built React office from `dist` with Cloudflare Workers Static Assets.
+- `src/worker.ts` serves static assets and returns a clear `501` response for `/api/*` and `/ws` until the backend is ported.
 - `cloudflare/d1-schema.sql` mirrors the local SQLite schema so the business data model is ready for Cloudflare D1.
 - R2 is reserved for uploaded documents and production creative assets; add the `ASSETS_BUCKET` binding after the bucket exists.
 
@@ -12,26 +13,29 @@ Felic Studio OS is designed as a sim-office SaaS: Vite/React renders the 3D offi
 
 | Concern | Local implementation | Cloudflare service target |
 |---|---|---|
-| Frontend | Vite static files | Pages / Workers Assets |
+| Frontend | Vite static files | Workers Static Assets |
 | Business data | SQLite via `better-sqlite3` | D1 using `DB` binding |
 | Documents/assets | URL register today | R2 via `ASSETS_BUCKET` binding |
 | Realtime presence/games | Node `ws` server | Durable Objects with WebSocket hibernation |
 | Secrets | environment variables/settings table | Wrangler secrets + D1 settings rows |
 | Google Sheets | REST service-account JWT | Worker `fetch` + secrets for private key |
 
-## Cloudflare Pages build settings
+## Cloudflare Workers build settings
 
-Use these settings in Cloudflare Pages:
+Use these settings when Cloudflare requires build and deploy commands:
 
 - Build command: `npm run build`
-- Build output directory: `dist`
-- Root directory: repository root
+- Deploy command: `npx wrangler deploy`
+- Non-production branch deploy command: `npx wrangler versions upload`
+- Path/root directory: `/`
 
-Do not add D1/R2 setup commands to the Pages build command. They are one-time provisioning operations and are not idempotent (`d1 create` and `r2 bucket create` fail after resources already exist).
+The Worker uses `[assets] directory = "./dist"` and `not_found_handling = "single-page-application"`, so direct links inside the React app fall back to `index.html`.
+
+Do not add D1/R2 setup commands to build or deploy commands. They are one-time provisioning operations and are not idempotent (`d1 create` and `r2 bucket create` fail after resources already exist).
 
 ## One-time Cloudflare setup
 
-Run these commands locally or in an authenticated admin terminal, not in the Pages build command:
+Run these commands locally or in an authenticated admin terminal, not in the build/deploy commands:
 
 ```bash
 npx wrangler d1 create felic-studio-os
