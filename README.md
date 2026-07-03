@@ -96,7 +96,7 @@ Do **not** paste D1/R2 provisioning commands into build or deploy commands; thos
 This repo includes a Cloudflare deployment scaffold:
 
 - `wrangler.toml` deploys the static 3D React client with Workers Static Assets.
-- `src/worker.ts` serves built assets and returns a clear placeholder for `/api/*` and `/ws` until the backend migration is complete.
+- `src/worker.ts` serves built assets, supports temporary admin login from `ADMIN_EMAIL` / `ADMIN_PASSWORD`, returns a minimal `/api/summary`, and keeps clear placeholders for data-writing APIs and `/ws` until the backend migration is complete.
 - `cloudflare/d1-schema.sql` mirrors the local SQLite business tables for D1 bootstrap.
 - `docs/cloudflare-deployment.md` documents the Workers, D1, R2, Durable Objects, and Google Sheets migration plan.
 

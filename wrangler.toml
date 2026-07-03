@@ -1,5 +1,4 @@
-# wrangler.toml
-name = 'fs-saas'
+name = "felic-studio-os"
 main = "src/worker.ts"
 compatibility_date = "2026-07-03"
 

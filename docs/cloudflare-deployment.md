@@ -5,7 +5,7 @@ Felic Studio OS is designed as a sim-office SaaS: Vite/React renders the 3D offi
 ## Current deployable surface
 
 - `wrangler.toml` deploys the built React office from `dist` with Cloudflare Workers Static Assets.
-- `src/worker.ts` serves static assets and returns a clear `501` response for `/api/*` and `/ws` until the backend is ported.
+- `src/worker.ts` serves static assets, supports temporary admin login from `ADMIN_EMAIL` / `ADMIN_PASSWORD`, returns a minimal `/api/summary`, and keeps clear `501` placeholders for data-writing APIs and `/ws` until the backend is ported.
 - `cloudflare/d1-schema.sql` mirrors the local SQLite schema so the business data model is ready for Cloudflare D1.
 - R2 is reserved for uploaded documents and production creative assets; add the `ASSETS_BUCKET` binding after the bucket exists.
 
@@ -55,6 +55,7 @@ npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON
 
 1. Port `server/db.ts` calls to a Worker repository layer using prepared D1 statements.
 2. Move Express routes in `server/index.ts` into Worker `fetch` handlers under `/api/*`.
-3. Replace local WebSocket server state in `server/ws.ts` with one Durable Object per office instance.
-4. Store uploaded files in R2 and write document metadata back to D1.
-5. Keep Google Sheets push/pull payloads identical so the existing SaaS windows do not need UI changes.
+3. Replace the temporary Worker admin login with D1-backed users/invites from `server/auth.ts` and `server/db.ts`.
+4. Replace local WebSocket server state in `server/ws.ts` with one Durable Object per office instance.
+5. Store uploaded files in R2 and write document metadata back to D1.
+6. Keep Google Sheets push/pull payloads identical so the existing SaaS windows do not need UI changes.
