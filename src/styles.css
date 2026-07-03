@@ -4,7 +4,7 @@
    display type, Space Grotesk UI, JetBrains Mono micro-labels. */
 
 :root {
-  --bg: #0a0d1c;
+  --bg: #090c1e;
   --cobalt: #2447f0;
   --cobalt-2: #4d6bff;
   --cobalt-deep: #1731ba;
@@ -14,8 +14,8 @@
   --orange-deep: #c74e0c;
   --orange-soft: #ffefe3;
 
-  --shell: #12141f;
-  --shell-2: #1a1d2c;
+  --shell: #10142c;
+  --shell-2: #182050;
   --shell-line: rgba(255, 255, 255, 0.08);
   --shell-ink: #f5f7ff;
   --shell-muted: #7e86a3;
@@ -36,8 +36,8 @@
   --radius-sm: 9px;
   --shadow: 0 24px 60px rgba(3, 6, 22, 0.55), 0 4px 14px rgba(3, 6, 22, 0.35);
   --shadow-card: 0 1px 2px rgba(18, 21, 31, 0.05), 0 6px 20px rgba(18, 21, 31, 0.07);
-  --glass: rgba(15, 17, 28, 0.78);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+  --glass: rgba(12, 16, 42, 0.8);
+  --glass-border: 1px solid rgba(120, 140, 255, 0.18);
   --mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
   --sans: "Space Grotesk Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
   --displayfont: "Archivo Black", "Arial Black", system-ui, sans-serif;
@@ -89,11 +89,10 @@ input, select, textarea { font-family: inherit; font-size: 13px; }
 
 /* floating 3D chip labels */
 .chip3d {
-  background: rgba(13, 15, 26, 0.82);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(3, 6, 22, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #ff8a1e, #f26212);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(242, 98, 18, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -6px 14px rgba(160, 50, 0, 0.35);
   padding: 6px 13px 6px 10px;
   display: flex;
   align-items: center;
@@ -104,10 +103,10 @@ input, select, textarea { font-family: inherit; font-size: 13px; }
   user-select: none;
 }
 .chip3d .t {
-  font-size: 11px; font-weight: 700; color: var(--shell-ink);
+  font-size: 11px; font-weight: 800; color: #1c1206;
   text-transform: uppercase; letter-spacing: 0.07em;
 }
-.chip3d .s { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--shell-muted); }
+.chip3d .s { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(40, 22, 4, 0.7); }
 
 .nametag {
   transform: translate(-50%, -100%);
@@ -294,9 +293,9 @@ input, select, textarea { font-family: inherit; font-size: 13px; }
 .auth-wrap {
   height: 100%; display: grid; place-items: center; position: relative; overflow: hidden;
   background:
-    radial-gradient(1000px 700px at 88% -5%, rgba(255, 106, 26, 0.22) 0%, transparent 55%),
-    radial-gradient(1300px 900px at 25% 105%, rgba(36, 71, 240, 0.5) 0%, transparent 62%),
-    linear-gradient(165deg, #10142e 0%, #0b0e24 55%, #070917 100%);
+    radial-gradient(1000px 700px at 88% -5%, rgba(255, 106, 26, 0.38) 0%, transparent 55%),
+    radial-gradient(1300px 900px at 25% 105%, rgba(36, 71, 240, 0.72) 0%, transparent 65%),
+    linear-gradient(165deg, #121a54 0%, #0b1034 55%, #070a1e 100%);
 }
 .auth-wrap::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -639,6 +638,6 @@ table.grid input:focus, table.grid select:focus { border-color: var(--cobalt); b
 }
 
 ::-webkit-scrollbar { width: 9px; height: 9px; }
-::-webkit-scrollbar-thumb { background: #363b52; border-radius: 9px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb { background: #2b3564; border-radius: 9px; border: 2px solid transparent; background-clip: content-box; }
 .win-body::-webkit-scrollbar-thumb { background: #c0c6da; border: 2px solid transparent; background-clip: content-box; }
 ::-webkit-scrollbar-track { background: transparent; }

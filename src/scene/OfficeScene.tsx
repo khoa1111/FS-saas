@@ -161,12 +161,12 @@ function useGridTexture() {
     const c = document.createElement("canvas");
     c.width = c.height = 256;
     const ctx = c.getContext("2d")!;
-    ctx.fillStyle = "#e7eaf3";
+    ctx.fillStyle = "#2338d6";
     ctx.fillRect(0, 0, 256, 256);
-    ctx.strokeStyle = "rgba(80, 90, 130, 0.22)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.30)";
     ctx.lineWidth = 1.5;
     ctx.strokeRect(0.75, 0.75, 255, 255);
-    ctx.strokeStyle = "rgba(80, 90, 130, 0.08)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.10)";
     for (let i = 64; i < 256; i += 64) {
       ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(256, i); ctx.stroke();
@@ -177,6 +177,39 @@ function useGridTexture() {
     tex.anisotropy = 8;
     return tex;
   }, []);
+}
+
+let panelCanvas: HTMLCanvasElement | null = null;
+function makePanelTexture(): THREE.CanvasTexture {
+  if (!panelCanvas) {
+    panelCanvas = document.createElement("canvas");
+    panelCanvas.width = panelCanvas.height = 128;
+    const ctx = panelCanvas.getContext("2d")!;
+    ctx.fillStyle = "#c9cfe2";
+    ctx.fillRect(0, 0, 128, 128);
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.roundRect(7, 7, 114, 114, 16);
+    ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(panelCanvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+/** Backlit frosted tile panel — the glowing room floor. */
+function BacklitPanel({ w, d }: { w: number; d: number }) {
+  const tex = useMemo(() => {
+    const t = makePanelTexture();
+    t.repeat.set(Math.max(2, Math.round(w / 1.35)), Math.max(2, Math.round(d / 1.35)));
+    return t;
+  }, [w, d]);
+  return (
+    <RoundedBox args={[w, 0.14, d]} radius={0.06} position={[0, 0.08, 0]} receiveShadow>
+      <meshStandardMaterial map={tex} emissive="#e8edff" emissiveMap={tex} emissiveIntensity={0.34} roughness={0.4} />
+    </RoundedBox>
+  );
 }
 
 function useSignTexture() {
@@ -208,8 +241,17 @@ function Floor() {
     <group>
       {/* plinth */}
       <RoundedBox args={[42.5, 1.4, 31.5]} radius={0.35} position={[0, -0.78, -0.25]} receiveShadow>
-        <meshStandardMaterial color="#141726" roughness={0.85} />
+        <meshStandardMaterial color="#101118" roughness={0.85} />
       </RoundedBox>
+      {/* hot light strip under the slab, front edges */}
+      <mesh position={[0, -0.22, 14.62]}>
+        <boxGeometry args={[41.4, 0.09, 0.07]} />
+        <meshStandardMaterial color="#ff3d1a" emissive="#ff3d1a" emissiveIntensity={2.6} toneMapped={false} />
+      </mesh>
+      <mesh position={[20.62, -0.22, -0.25]} rotation={[0, Math.PI / 2, 0]}>
+        <boxGeometry args={[29.7, 0.09, 0.07]} />
+        <meshStandardMaterial color="#ff3d1a" emissive="#ff3d1a" emissiveIntensity={2.6} toneMapped={false} />
+      </mesh>
       {/* floor slab */}
       <mesh position={[0, -0.04, -0.25]} receiveShadow>
         <boxGeometry args={[41, 0.14, 30]} />
@@ -222,7 +264,7 @@ function Floor() {
 function Walls() {
   const sign = useSignTexture();
   const windowMat = (
-    <meshStandardMaterial color="#aec4ff" emissive="#8fb0ff" emissiveIntensity={0.5} roughness={0.2} metalness={0.1} />
+    <meshStandardMaterial color="#f4f7ff" emissive="#e9efff" emissiveIntensity={0.85} roughness={0.25} />
   );
   return (
     <group>
@@ -230,7 +272,7 @@ function Walls() {
       <group position={[0, 0, -15.2]}>
         <mesh position={[0, 2.1, 0]} receiveShadow castShadow>
           <boxGeometry args={[41, 4.2, 0.45]} />
-          <meshStandardMaterial color="#f0f1f7" roughness={0.9} />
+          <meshStandardMaterial color="#2743e0" roughness={0.55} metalness={0.25} envMapIntensity={0.7} />
         </mesh>
         {/* charcoal base strip */}
         <mesh position={[0, 0.35, 0.24]}>
@@ -270,7 +312,7 @@ function Walls() {
       <group position={[-20.9, 0, -0.25]} rotation={[0, Math.PI / 2, 0]}>
         <mesh position={[0, 2.1, 0]} receiveShadow castShadow>
           <boxGeometry args={[30, 4.2, 0.45]} />
-          <meshStandardMaterial color="#eceef5" roughness={0.9} />
+          <meshStandardMaterial color="#2036c8" roughness={0.55} metalness={0.25} envMapIntensity={0.7} />
         </mesh>
         <mesh position={[0, 0.35, 0.24]}>
           <boxGeometry args={[30, 0.7, 0.04]} />
@@ -293,7 +335,7 @@ function Walls() {
           </group>
         ))}
         {/* poster frames */}
-        {[[-13.2, "#f2661f"], [13.2, "#7b5cff"]].map(([x, col]) => (
+        {[[-13.2, "#f2661f"], [13.2, "#ffffff"]].map(([x, col]) => (
           <group key={String(x)} position={[Number(x), 2.3, 0.26]}>
             <mesh>
               <boxGeometry args={[1.5, 2, 0.06]} />
@@ -323,13 +365,11 @@ function RoomPlates() {
         const railAlongX = Math.abs(r.center[1]) > Math.abs(r.center[0]); // rooms on north/south edges
         return (
           <group key={r.id} position={[r.center[0], 0, r.center[1]]}>
-            {/* carpet */}
-            <RoundedBox args={[w, 0.1, d]} radius={0.05} position={[0, 0.06, 0]} receiveShadow>
-              <meshStandardMaterial color={r.tint} roughness={0.95} />
-            </RoundedBox>
+            {/* backlit frosted panel */}
+            <BacklitPanel w={w} d={d} />
             {/* accent glow rail */}
             <mesh
-              position={railAlongX ? [0, 0.1, -d / 2 + 0.08] : [-w / 2 + 0.08, 0.1, 0]}
+              position={railAlongX ? [0, 0.17, -d / 2 + 0.08] : [-w / 2 + 0.08, 0.17, 0]}
               rotation={railAlongX ? [0, 0, 0] : [0, Math.PI / 2, 0]}
             >
               <boxGeometry args={[w - 0.5, 0.06, 0.09]} />
@@ -354,8 +394,8 @@ function RoomPlates() {
 export default function OfficeScene() {
   const { scene, gl } = useThree();
   useMemo(() => {
-    scene.background = new THREE.Color("#0a0d1c");
-    scene.fog = new THREE.Fog("#0a0d1c", 58, 100);
+    scene.background = new THREE.Color("#090c1e");
+    scene.fog = new THREE.Fog("#090c1e", 58, 100);
     gl.toneMapping = THREE.ACESFilmicToneMapping;
     gl.toneMappingExposure = 1.0;
   }, [scene, gl]);
@@ -388,7 +428,7 @@ export default function OfficeScene() {
       <Environment resolution={128} frames={1}>
         <Lightformer intensity={1.0} position={[0, 10, 0]} scale={[12, 12, 1]} rotation-x={Math.PI / 2} color="#ffffff" />
         <Lightformer intensity={0.5} position={[-10, 5, -8]} scale={[10, 4, 1]} color="#b7c6ff" />
-        <Lightformer intensity={0.6} position={[10, 5, 8]} rotation-y={Math.PI} scale={[10, 4, 1]} color="#ffd9b8" />
+        <Lightformer intensity={0.85} position={[10, 5, 8]} rotation-y={Math.PI} scale={[10, 4, 1]} color="#ff9a4d" />
       </Environment>
 
       <Floor />
@@ -434,7 +474,7 @@ export default function OfficeScene() {
 
       <EffectComposer multisampling={0}>
         <N8AO halfRes intensity={2.2} aoRadius={1.3} distanceFalloff={1} quality="performance" />
-        <Bloom mipmapBlur intensity={0.5} luminanceThreshold={1.1} luminanceSmoothing={0.2} />
+        <Bloom mipmapBlur intensity={0.65} luminanceThreshold={1.05} luminanceSmoothing={0.2} />
         <BrightnessContrast brightness={0.01} contrast={0.11} />
         <Vignette eskil={false} offset={0.1} darkness={0.5} />
       </EffectComposer>
