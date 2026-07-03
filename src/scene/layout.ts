@@ -7,7 +7,8 @@ export interface RoomDef {
   center: [number, number]; // x, z of floor plate
   size: [number, number];
   interact: [number, number]; // where the interactable prop sits
-  tint: string; // floor plate tint
+  tint: string; // carpet tint
+  accent: string; // glow rail / identity color
 }
 
 export const ROOMS: RoomDef[] = [
@@ -18,7 +19,8 @@ export const ROOMS: RoomDef[] = [
     center: [-15, -8.5],
     size: [8.5, 8],
     interact: [-15, -9],
-    tint: "#dfe5f7"
+    tint: "#cdd9f6",
+    accent: "#4d6bff"
   },
   {
     id: "documents",
@@ -27,7 +29,8 @@ export const ROOMS: RoomDef[] = [
     center: [-15, 7],
     size: [8.5, 7.5],
     interact: [-15.5, 6.5],
-    tint: "#e6e2f5"
+    tint: "#dcd4f4",
+    accent: "#7b5cff"
   },
   {
     id: "hr",
@@ -36,7 +39,8 @@ export const ROOMS: RoomDef[] = [
     center: [-5.5, -11],
     size: [8, 5.5],
     interact: [-5.5, -11.5],
-    tint: "#ddf0e6"
+    tint: "#c9ead9",
+    accent: "#16b26a"
   },
   {
     id: "projects",
@@ -45,7 +49,8 @@ export const ROOMS: RoomDef[] = [
     center: [5.5, -11],
     size: [8, 5.5],
     interact: [4.2, -11.2],
-    tint: "#fbe9dc"
+    tint: "#fadcc7",
+    accent: "#f2661f"
   },
   {
     id: "workflow",
@@ -54,7 +59,8 @@ export const ROOMS: RoomDef[] = [
     center: [15, -8.5],
     size: [8.5, 8],
     interact: [15, -8.5],
-    tint: "#e3e8f2"
+    tint: "#cfdaf3",
+    accent: "#2447f0"
   },
   {
     id: "crm",
@@ -63,7 +69,8 @@ export const ROOMS: RoomDef[] = [
     center: [15, 7],
     size: [8.5, 7.5],
     interact: [15.5, 6.5],
-    tint: "#fdeeda"
+    tint: "#f9e3b9",
+    accent: "#f5a623"
   },
   {
     id: "games",
@@ -72,7 +79,8 @@ export const ROOMS: RoomDef[] = [
     center: [0, 11],
     size: [9, 5.5],
     interact: [0, 11],
-    tint: "#e9e3f8"
+    tint: "#e6d3f4",
+    accent: "#d551d9"
   }
 ];
 

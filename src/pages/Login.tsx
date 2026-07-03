@@ -25,15 +25,17 @@ export default function Login() {
     }
   }
 
+  const ticker = "FINANCE DECK /// THE VAULT /// HR CHECK-IN /// PROJECT GYM /// FLOW LINE /// CLIENT LOUNGE /// ARCADE CORNER /// ";
   return (
     <div className="auth-wrap">
       <div className="auth-hero">
         <span className="mlabel">FELIC STUDIO — STANDARD INDUSTRY OS</span>
-        <h2>
+        <h2 className="display">
           RUN THE<br />
           <em>STUDIO.</em>
         </h2>
       </div>
+      <div className="auth-ticker"><span>{ticker + ticker}</span></div>
       <form className="auth-card" onSubmit={submit}>
         <div className="brandbar" style={{ position: "static" }}>
           <div className="logo">F!</div>

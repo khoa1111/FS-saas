@@ -4,6 +4,7 @@ import { useStore } from "../store";
 import { send, sendWork, wsDisconnect } from "../ws";
 import { ALL_ROOMS, ROOM_LABELS } from "../../shared/types";
 import { ROOMS } from "../scene/layout";
+import { Icon, ROOM_ICON } from "../ui/icons";
 
 interface Summary {
   online: number;
@@ -121,7 +122,7 @@ export default function Hud() {
             const allowed = user.isAdmin || user.rooms.includes(r);
             return (
               <button key={r} disabled={!allowed} onClick={() => { setOpenApp(r); sendWork(r); }}>
-                <span className={`dot ${allowed ? "blue" : "red"}`} />
+                <Icon name={ROOM_ICON[r]} />
                 {ROOM_LABELS[r]}
                 <span className="sub">{allowed ? "open" : "locked"}</span>
               </button>
@@ -129,13 +130,13 @@ export default function Hud() {
           })}
           {user.isAdmin && (
             <button onClick={() => setOpenApp("admin")}>
-              <span className="dot orange" />
+              <Icon name="admin" />
               Admin Console
               <span className="sub">ctrl</span>
             </button>
           )}
           <button onClick={logout}>
-            <span className="dot red" />
+            <Icon name="logout" />
             Log out
             <span className="sub">{user.name}</span>
           </button>

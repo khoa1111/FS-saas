@@ -1,6 +1,7 @@
 import { useStore, type OpenApp } from "../store";
 import { sendWork } from "../ws";
 import { ROOM_LABELS } from "../../shared/types";
+import { Icon, ROOM_ICON } from "../ui/icons";
 import FinanceApp from "./FinanceApp";
 import DocumentsApp from "./DocumentsApp";
 import HrApp from "./HrApp";
@@ -36,6 +37,12 @@ export default function WindowOverlay({ app }: { app: Exclude<OpenApp, null> }) 
       <div className="window">
         <div className="win-head">
           <div className="traffic"><i /><i /><i /></div>
+          <span
+            className="appicon"
+            style={app === "admin" ? { background: "linear-gradient(150deg, var(--orange-2), var(--orange))", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 12px rgba(242,102,31,0.4)" } : undefined}
+          >
+            <Icon name={ROOM_ICON[app]} size={15} />
+          </span>
           <span className="title">{title}</span>
           <span className="mlabel">{SUBTITLES[app]}</span>
           <button className="close" onClick={close}>ESC · Close</button>

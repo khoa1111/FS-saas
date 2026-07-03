@@ -42,15 +42,17 @@ export default function Invite({ token }: { token: string }) {
     }
   }
 
+  const ticker = "ONBOARDING /// PICK YOUR COLOR /// CLAIM YOUR DESK /// MEET THE CREW /// PLAY THE ARCADE /// SHIP GREAT WORK /// ";
   return (
     <div className="auth-wrap">
       <div className="auth-hero">
         <span className="mlabel">FELIC STUDIO — CREW ONBOARDING</span>
-        <h2>
+        <h2 className="display">
           JOIN THE<br />
           <em>CREW.</em>
         </h2>
       </div>
+      <div className="auth-ticker"><span>{ticker + ticker}</span></div>
       <form className="auth-card" onSubmit={submit}>
         <div className="brandbar" style={{ position: "static" }}>
           <div className="logo">F!</div>

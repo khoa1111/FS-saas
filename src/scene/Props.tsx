@@ -136,12 +136,12 @@ export function VaultRoom({ position }: { position: [number, number, number] }) 
     <group position={position}>
       <mesh position={[0, 1.5, -1]} castShadow>
         <boxGeometry args={[3.4, 3, 2.2]} />
-        <meshStandardMaterial color={STEEL} metalness={0.55} roughness={0.35} />
+        <meshStandardMaterial color={STEEL} metalness={0.75} roughness={0.28} envMapIntensity={1.2} />
       </mesh>
       {/* door */}
       <mesh position={[0, 1.4, 0.14]} rotation={[Math.PI / 2, 0, 0]} castShadow>
         <cylinderGeometry args={[1.05, 1.05, 0.22, 32]} />
-        <meshStandardMaterial color="#aeb4c6" metalness={0.65} roughness={0.3} />
+        <meshStandardMaterial color="#b6bccd" metalness={0.85} roughness={0.22} envMapIntensity={1.3} />
       </mesh>
       {/* handle wheel */}
       <group ref={wheel} position={[0, 1.4, 0.36]}>
@@ -163,7 +163,7 @@ export function VaultRoom({ position }: { position: [number, number, number] }) 
       </mesh>
       <mesh position={[-1.25, 1.7, 0.18]}>
         <boxGeometry args={[0.34, 0.44, 0.06]} />
-        <meshStandardMaterial color={COBALT} emissive={COBALT} emissiveIntensity={0.4} />
+        <meshStandardMaterial color={COBALT} emissive={COBALT} emissiveIntensity={1.6} toneMapped={false} />
       </mesh>
       {/* document boxes stacked beside */}
       {[0, 1, 2].map((i) => (
@@ -196,11 +196,11 @@ export function HrRoom({ position }: { position: [number, number, number] }) {
       </mesh>
       <mesh position={[0, 1.44, 0.22]} rotation={[-0.5, 0, 0]}>
         <planeGeometry args={[0.6, 0.38]} />
-        <meshStandardMaterial color={COBALT} emissive={COBALT} emissiveIntensity={0.7} />
+        <meshStandardMaterial color={COBALT} emissive={COBALT} emissiveIntensity={1.8} toneMapped={false} />
       </mesh>
       <mesh position={[0, 0.95, 0.28]}>
         <sphereGeometry args={[0.05, 10, 10]} />
-        <meshStandardMaterial ref={light} color="#17b26a" emissive="#17b26a" emissiveIntensity={1.5} />
+        <meshStandardMaterial ref={light} color="#17b26a" emissive="#17b26a" emissiveIntensity={1.8} toneMapped={false} />
       </mesh>
       {/* card slot */}
       <mesh position={[0, 0.72, 0.27]}>
@@ -264,7 +264,7 @@ function Treadmill({ position, rotation = 0 }: { position: [number, number, numb
       </mesh>
       <mesh position={[0, 1.13, -0.82]} rotation={[-0.4, 0, 0]}>
         <planeGeometry args={[0.7, 0.18]} />
-        <meshStandardMaterial color={ORANGE} emissive={ORANGE} emissiveIntensity={0.8} />
+        <meshStandardMaterial color={ORANGE} emissive={ORANGE} emissiveIntensity={1.8} toneMapped={false} />
       </mesh>
     </group>
   );
@@ -329,7 +329,7 @@ export function WorkflowRoom({ position }: { position: [number, number, number] 
           {/* glowing scanner arch */}
           <mesh position={[i === 0 ? -1 : 1, 0.86, 0]}>
             <boxGeometry args={[0.14, 0.6, 1.2]} />
-            <meshStandardMaterial color={COBALT} emissive={COBALT} emissiveIntensity={0.9} />
+            <meshStandardMaterial color={COBALT} emissive={COBALT} emissiveIntensity={2} toneMapped={false} />
           </mesh>
         </group>
       ))}
@@ -406,7 +406,7 @@ export function GamesRoom({ position }: { position: [number, number, number] }) 
       </mesh>
       <mesh position={[0, 0.585, 0]}>
         <planeGeometry args={[1.7, 1]} />
-        <meshStandardMaterial ref={glow} color={COBALT} emissive={COBALT} emissiveIntensity={1} />
+        <meshStandardMaterial ref={glow} color={COBALT} emissive={COBALT} emissiveIntensity={1.4} toneMapped={false} />
       </mesh>
       {[-0.85, 0.85].map((x) => (
         <mesh key={x} position={[x, 0.25, 0]}>
@@ -440,7 +440,7 @@ export function GamesRoom({ position }: { position: [number, number, number] }) 
         </mesh>
         <mesh position={[0, 1.15, 0.32]} rotation={[-0.25, 0, 0]}>
           <planeGeometry args={[0.6, 0.5]} />
-          <meshStandardMaterial color="#171922" emissive={"#4d6bff"} emissiveIntensity={0.6} />
+          <meshStandardMaterial color="#171922" emissive={"#4d6bff"} emissiveIntensity={0.9} />
         </mesh>
         <mesh position={[0, 0.72, 0.38]}>
           <boxGeometry args={[0.6, 0.1, 0.2]} />
@@ -475,7 +475,7 @@ export function Desk({ position, rotation = 0 }: { position: [number, number, nu
           </mesh>
           <mesh position={[0, 0, 0.03]}>
             <planeGeometry args={[0.58, 0.34]} />
-            <meshStandardMaterial color="#171922" emissive={i === 0 ? "#4d6bff" : "#d95926"} emissiveIntensity={0.55} />
+            <meshStandardMaterial color="#171922" emissive={i === 0 ? "#4d6bff" : "#d95926"} emissiveIntensity={0.8} />
           </mesh>
         </group>
       ))}
@@ -502,7 +502,7 @@ export function SecurityGate({ position }: { position: [number, number, number] 
       ))}
       <mesh position={[0, 0.9, 0]}>
         <boxGeometry args={[1.56, 0.06, 0.06]} />
-        <meshStandardMaterial ref={beam} color={ORANGE} emissive={ORANGE} emissiveIntensity={1} />
+        <meshStandardMaterial ref={beam} color={ORANGE} emissive={ORANGE} emissiveIntensity={1.6} toneMapped={false} />
       </mesh>
       {[-0.9, 0.9].map((x) => (
         <mesh key={`t${x}`} position={[x, 1.34, 0]}>
@@ -529,6 +529,146 @@ export function Plant({ position }: { position: [number, number, number] }) {
         <sphereGeometry args={[0.2, 10, 10]} />
         <meshStandardMaterial color="#3cb56d" roughness={0.8} />
       </mesh>
+    </group>
+  );
+}
+
+/* ---------- Center lounge ---------- */
+
+export function Lounge({ position, rotation = 0 }: { position: [number, number, number]; rotation?: number }) {
+  return (
+    <group position={position} rotation={[0, rotation, 0]}>
+      {/* rug */}
+      <mesh position={[0, 0.045, 0]} receiveShadow>
+        <cylinderGeometry args={[2.7, 2.7, 0.05, 40]} />
+        <meshStandardMaterial color="#cdd5ea" roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.052, 0]}>
+        <cylinderGeometry args={[2.2, 2.2, 0.05, 40]} />
+        <meshStandardMaterial color="#dde3f2" roughness={1} />
+      </mesh>
+      {/* L sofa */}
+      <group position={[-1.1, 0, -0.9]}>
+        <mesh position={[0.6, 0.32, 0]} castShadow>
+          <boxGeometry args={[2.6, 0.5, 0.95]} />
+          <meshStandardMaterial color="#242838" roughness={0.9} />
+        </mesh>
+        <mesh position={[0.6, 0.78, -0.38]} castShadow>
+          <boxGeometry args={[2.6, 0.55, 0.22]} />
+          <meshStandardMaterial color="#242838" roughness={0.9} />
+        </mesh>
+        {/* cushions */}
+        {[-0.3, 0.6, 1.5].map((x, i) => (
+          <mesh key={x} position={[x, 0.62, 0.05]} castShadow>
+            <boxGeometry args={[0.78, 0.16, 0.75]} />
+            <meshStandardMaterial color={i === 1 ? ORANGE : "#3a4058"} roughness={0.85} />
+          </mesh>
+        ))}
+      </group>
+      {/* side seat */}
+      <group position={[1.5, 0, -0.2]} rotation={[0, -Math.PI / 2, 0]}>
+        <mesh position={[0, 0.32, 0]} castShadow>
+          <boxGeometry args={[1.1, 0.5, 0.95]} />
+          <meshStandardMaterial color="#242838" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0.78, -0.38]} castShadow>
+          <boxGeometry args={[1.1, 0.55, 0.22]} />
+          <meshStandardMaterial color="#242838" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0.62, 0.05]} castShadow>
+          <boxGeometry args={[0.9, 0.16, 0.75]} />
+          <meshStandardMaterial color={COBALT} roughness={0.85} />
+        </mesh>
+      </group>
+      {/* coffee table */}
+      <group position={[0.1, 0, 0.9]}>
+        <mesh position={[0, 0.34, 0]} castShadow>
+          <cylinderGeometry args={[0.62, 0.62, 0.06, 28]} />
+          <meshStandardMaterial color="#f5f6fa" roughness={0.3} metalness={0.1} envMapIntensity={0.8} />
+        </mesh>
+        <mesh position={[0, 0.16, 0]}>
+          <cylinderGeometry args={[0.09, 0.12, 0.32, 12]} />
+          <meshStandardMaterial color={CHARCOAL} metalness={0.4} />
+        </mesh>
+        {/* magazines + mug */}
+        <mesh position={[-0.15, 0.4, 0.05]} rotation={[0, 0.4, 0]}>
+          <boxGeometry args={[0.34, 0.03, 0.24]} />
+          <meshStandardMaterial color={ORANGE} />
+        </mesh>
+        <mesh position={[0.2, 0.42, -0.12]}>
+          <cylinderGeometry args={[0.05, 0.045, 0.09, 12]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+/* ---------- Coffee bar ---------- */
+
+export function CoffeeBar({ position, rotation = 0 }: { position: [number, number, number]; rotation?: number }) {
+  const steam = useRef<THREE.Mesh>(null);
+  useFrame(({ clock }) => {
+    if (steam.current) {
+      steam.current.position.y = 1.28 + Math.sin(clock.elapsedTime * 2) * 0.04;
+      (steam.current.material as THREE.MeshStandardMaterial).opacity = 0.25 + Math.sin(clock.elapsedTime * 2.7) * 0.15;
+    }
+  });
+  return (
+    <group position={position} rotation={[0, rotation, 0]}>
+      {/* counter */}
+      <mesh position={[0, 0.55, 0]} castShadow>
+        <boxGeometry args={[2.6, 1.1, 0.9]} />
+        <meshStandardMaterial color="#242838" roughness={0.75} />
+      </mesh>
+      <mesh position={[0, 1.13, 0]} castShadow>
+        <boxGeometry args={[2.8, 0.08, 1.05]} />
+        <meshStandardMaterial color="#f5f6fa" roughness={0.3} metalness={0.05} envMapIntensity={0.8} />
+      </mesh>
+      {/* orange face stripe */}
+      <mesh position={[0, 0.32, 0.46]}>
+        <boxGeometry args={[2.6, 0.14, 0.02]} />
+        <meshStandardMaterial color={ORANGE} emissive={ORANGE} emissiveIntensity={1.2} toneMapped={false} />
+      </mesh>
+      {/* espresso machine */}
+      <group position={[-0.7, 1.17, -0.05]}>
+        <mesh position={[0, 0.22, 0]} castShadow>
+          <boxGeometry args={[0.62, 0.44, 0.5]} />
+          <meshStandardMaterial color="#c8ccda" metalness={0.7} roughness={0.3} envMapIntensity={1.1} />
+        </mesh>
+        <mesh position={[0, 0.47, 0]}>
+          <boxGeometry args={[0.5, 0.06, 0.4]} />
+          <meshStandardMaterial color={CHARCOAL} />
+        </mesh>
+        <mesh position={[0, 0.06, 0.18]}>
+          <cylinderGeometry args={[0.045, 0.04, 0.1, 10]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+        <mesh ref={steam} position={[0, 1.28, 0.18]}>
+          <sphereGeometry args={[0.05, 8, 8]} />
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.3} />
+        </mesh>
+      </group>
+      {/* cups */}
+      {[0.2, 0.55, 0.9].map((x, i) => (
+        <mesh key={x} position={[x, 1.23, 0.12 - i * 0.14]}>
+          <cylinderGeometry args={[0.05, 0.045, 0.11, 10]} />
+          <meshStandardMaterial color={i === 1 ? ORANGE : "#ffffff"} />
+        </mesh>
+      ))}
+      {/* stools */}
+      {[-0.7, 0.5].map((x) => (
+        <group key={x} position={[x, 0, 1]}>
+          <mesh position={[0, 0.42, 0]} castShadow>
+            <cylinderGeometry args={[0.24, 0.24, 0.07, 16]} />
+            <meshStandardMaterial color={COBALT} roughness={0.6} />
+          </mesh>
+          <mesh position={[0, 0.2, 0]}>
+            <cylinderGeometry args={[0.05, 0.08, 0.4, 10]} />
+            <meshStandardMaterial color={CHARCOAL} metalness={0.4} />
+          </mesh>
+        </group>
+      ))}
     </group>
   );
 }

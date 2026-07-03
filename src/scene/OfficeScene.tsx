@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Html, OrthographicCamera } from "@react-three/drei";
+import { ContactShadows, Environment, Html, Lightformer, OrthographicCamera, RoundedBox } from "@react-three/drei";
+import { EffectComposer, Bloom, BrightnessContrast, N8AO, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { useStore } from "../store";
 import { myPlayerId, sendMove } from "../ws";
 import { BOUNDS, ROOMS, SPAWN, nearestRoom } from "./layout";
 import Character from "./Character";
 import {
-  CrmRoom, Desk, FinanceRoom, GamesRoom, HrRoom, Plant,
+  CoffeeBar, CrmRoom, Desk, FinanceRoom, GamesRoom, HrRoom, Lounge, Plant,
   ProjectsRoom, SecurityGate, VaultRoom, WorkflowRoom, Whiteboard
 } from "./Props";
 
@@ -81,14 +82,12 @@ function Player() {
     g.position.set(pos.current.x, 0, pos.current.y);
     g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, heading.current, Math.min(1, dt * 12));
 
-    // camera follow
     const cam = camRef.current;
     if (cam) {
       cam.position.set(pos.current.x + 16, 17, pos.current.y + 16);
       cam.lookAt(pos.current.x, 0.6, pos.current.y);
     }
 
-    // interactable proximity
     const near = nearestRoom(pos.current.x, pos.current.y);
     if (near !== lastNear.current) {
       lastNear.current = near;
@@ -98,7 +97,7 @@ function Player() {
 
   return (
     <>
-      <OrthographicCamera ref={camRef} makeDefault zoom={44} position={[16, 17, 16]} near={-50} far={200} />
+      <OrthographicCamera ref={camRef} makeDefault zoom={42} position={[16, 17, 16]} near={-50} far={200} />
       <group ref={group}>
         <Character
           color={user.color}
@@ -150,17 +149,168 @@ function OtherPlayers() {
   const me = myPlayerId();
   return (
     <>
-      {ids
-        .map(Number)
-        .filter((id) => id !== me)
-        .map((id) => (
-          <RemotePlayer key={id} id={id} />
-        ))}
+      {ids.map(Number).filter((id) => id !== me).map((id) => <RemotePlayer key={id} id={id} />)}
     </>
   );
 }
 
-/* ---------- room floor plates + chips ---------- */
+/* ---------- architectural shell ---------- */
+
+function useGridTexture() {
+  return useMemo(() => {
+    const c = document.createElement("canvas");
+    c.width = c.height = 256;
+    const ctx = c.getContext("2d")!;
+    ctx.fillStyle = "#e7eaf3";
+    ctx.fillRect(0, 0, 256, 256);
+    ctx.strokeStyle = "rgba(80, 90, 130, 0.22)";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(0.75, 0.75, 255, 255);
+    ctx.strokeStyle = "rgba(80, 90, 130, 0.08)";
+    for (let i = 64; i < 256; i += 64) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(256, i); ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(20, 15);
+    tex.anisotropy = 8;
+    return tex;
+  }, []);
+}
+
+function useSignTexture() {
+  return useMemo(() => {
+    const c = document.createElement("canvas");
+    c.width = 1024;
+    c.height = 256;
+    const ctx = c.getContext("2d")!;
+    ctx.fillStyle = "#12141f";
+    ctx.fillRect(0, 0, 1024, 256);
+    ctx.fillStyle = "#f2661f";
+    ctx.fillRect(46, 92, 14, 72);
+    ctx.font = "900 104px 'Archivo Black', 'Arial Black', sans-serif";
+    ctx.fillStyle = "#ffffff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("FELIC STUDIO", 92, 132);
+    ctx.font = "500 26px 'JetBrains Mono', monospace";
+    ctx.fillStyle = "#7e86a3";
+    ctx.fillText("S T A N D A R D   I N D U S T R Y   O S", 96, 208);
+    const tex = new THREE.CanvasTexture(c);
+    tex.anisotropy = 8;
+    return tex;
+  }, []);
+}
+
+function Floor() {
+  const grid = useGridTexture();
+  return (
+    <group>
+      {/* plinth */}
+      <RoundedBox args={[42.5, 1.4, 31.5]} radius={0.35} position={[0, -0.78, -0.25]} receiveShadow>
+        <meshStandardMaterial color="#141726" roughness={0.85} />
+      </RoundedBox>
+      {/* floor slab */}
+      <mesh position={[0, -0.04, -0.25]} receiveShadow>
+        <boxGeometry args={[41, 0.14, 30]} />
+        <meshStandardMaterial map={grid} roughness={0.75} metalness={0.02} envMapIntensity={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+function Walls() {
+  const sign = useSignTexture();
+  const windowMat = (
+    <meshStandardMaterial color="#aec4ff" emissive="#8fb0ff" emissiveIntensity={0.5} roughness={0.2} metalness={0.1} />
+  );
+  return (
+    <group>
+      {/* north wall (z = -15) */}
+      <group position={[0, 0, -15.2]}>
+        <mesh position={[0, 2.1, 0]} receiveShadow castShadow>
+          <boxGeometry args={[41, 4.2, 0.45]} />
+          <meshStandardMaterial color="#f0f1f7" roughness={0.9} />
+        </mesh>
+        {/* charcoal base strip */}
+        <mesh position={[0, 0.35, 0.24]}>
+          <boxGeometry args={[41, 0.7, 0.04]} />
+          <meshStandardMaterial color="#1a1d2c" roughness={0.6} />
+        </mesh>
+        {/* orange top trim */}
+        <mesh position={[0, 4.14, 0.24]}>
+          <boxGeometry args={[41, 0.1, 0.04]} />
+          <meshStandardMaterial color="#f2661f" emissive="#f2661f" emissiveIntensity={1.6} />
+        </mesh>
+        {/* windows */}
+        {[-13, -6.5, 6.5, 13].map((x) => (
+          <group key={x} position={[x, 2.35, 0.24]}>
+            <mesh>
+              <boxGeometry args={[3.6, 2.2, 0.06]} />
+              <meshStandardMaterial color="#1a1d2c" roughness={0.5} />
+            </mesh>
+            <mesh position={[0, 0, 0.04]}>
+              <planeGeometry args={[3.3, 1.9]} />
+              {windowMat}
+            </mesh>
+            <mesh position={[0, 0, 0.06]}>
+              <boxGeometry args={[0.06, 1.9, 0.02]} />
+              <meshStandardMaterial color="#1a1d2c" />
+            </mesh>
+          </group>
+        ))}
+        {/* studio sign */}
+        <mesh position={[0, 2.6, 0.26]}>
+          <planeGeometry args={[6.8, 1.7]} />
+          <meshBasicMaterial map={sign} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* west wall (x = -21) */}
+      <group position={[-20.9, 0, -0.25]} rotation={[0, Math.PI / 2, 0]}>
+        <mesh position={[0, 2.1, 0]} receiveShadow castShadow>
+          <boxGeometry args={[30, 4.2, 0.45]} />
+          <meshStandardMaterial color="#eceef5" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0.35, 0.24]}>
+          <boxGeometry args={[30, 0.7, 0.04]} />
+          <meshStandardMaterial color="#1a1d2c" roughness={0.6} />
+        </mesh>
+        <mesh position={[0, 4.14, 0.24]}>
+          <boxGeometry args={[30, 0.1, 0.04]} />
+          <meshStandardMaterial color="#4d6bff" emissive="#4d6bff" emissiveIntensity={1.6} />
+        </mesh>
+        {[-9, 0, 9].map((x) => (
+          <group key={x} position={[x, 2.35, 0.24]}>
+            <mesh>
+              <boxGeometry args={[3.6, 2.2, 0.06]} />
+              <meshStandardMaterial color="#1a1d2c" roughness={0.5} />
+            </mesh>
+            <mesh position={[0, 0, 0.04]}>
+              <planeGeometry args={[3.3, 1.9]} />
+              {windowMat}
+            </mesh>
+          </group>
+        ))}
+        {/* poster frames */}
+        {[[-13.2, "#f2661f"], [13.2, "#7b5cff"]].map(([x, col]) => (
+          <group key={String(x)} position={[Number(x), 2.3, 0.26]}>
+            <mesh>
+              <boxGeometry args={[1.5, 2, 0.06]} />
+              <meshStandardMaterial color="#ffffff" roughness={0.6} />
+            </mesh>
+            <mesh position={[0, 0, 0.04]}>
+              <planeGeometry args={[1.26, 1.76]} />
+              <meshStandardMaterial color={String(col)} roughness={0.5} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+    </group>
+  );
+}
+
+/* ---------- room carpets, glow rails, ceiling bars, chips ---------- */
 
 function RoomPlates() {
   const user = useStore((s) => s.user)!;
@@ -168,13 +318,24 @@ function RoomPlates() {
     <>
       {ROOMS.map((r) => {
         const allowed = user.isAdmin || user.rooms.includes(r.id);
+        const [w, d] = r.size;
+        // glow rail on the edge facing away from camera (back-left of each room)
+        const railAlongX = Math.abs(r.center[1]) > Math.abs(r.center[0]); // rooms on north/south edges
         return (
           <group key={r.id} position={[r.center[0], 0, r.center[1]]}>
-            <mesh position={[0, 0.05, 0]} receiveShadow>
-              <boxGeometry args={[r.size[0], 0.1, r.size[1]]} />
-              <meshStandardMaterial color={r.tint} roughness={0.9} />
+            {/* carpet */}
+            <RoundedBox args={[w, 0.1, d]} radius={0.05} position={[0, 0.06, 0]} receiveShadow>
+              <meshStandardMaterial color={r.tint} roughness={0.95} />
+            </RoundedBox>
+            {/* accent glow rail */}
+            <mesh
+              position={railAlongX ? [0, 0.1, -d / 2 + 0.08] : [-w / 2 + 0.08, 0.1, 0]}
+              rotation={railAlongX ? [0, 0, 0] : [0, Math.PI / 2, 0]}
+            >
+              <boxGeometry args={[w - 0.5, 0.06, 0.09]} />
+              <meshStandardMaterial color={r.accent} emissive={r.accent} emissiveIntensity={2.2} toneMapped={false} />
             </mesh>
-            <Html position={[0, 3.1, 0]} center zIndexRange={[4, 0]}>
+            <Html position={[0, 2.5, 0]} center zIndexRange={[4, 0]}>
               <div className="chip3d">
                 <span className={`dot ${allowed ? "green" : "red"}`} />
                 <span className="t">{r.label}</span>
@@ -191,11 +352,13 @@ function RoomPlates() {
 /* ---------- scene ---------- */
 
 export default function OfficeScene() {
-  const { scene } = useThree();
+  const { scene, gl } = useThree();
   useMemo(() => {
-    scene.background = new THREE.Color("#0e1120");
-    scene.fog = new THREE.Fog("#0e1120", 55, 95);
-  }, [scene]);
+    scene.background = new THREE.Color("#0a0d1c");
+    scene.fog = new THREE.Fog("#0a0d1c", 58, 100);
+    gl.toneMapping = THREE.ACESFilmicToneMapping;
+    gl.toneMappingExposure = 1.0;
+  }, [scene, gl]);
 
   const roomPos = useMemo(() => {
     const m: Record<string, [number, number, number]> = {};
@@ -205,29 +368,41 @@ export default function OfficeScene() {
 
   return (
     <>
-      <ambientLight intensity={0.75} />
+      <ambientLight intensity={0.2} />
+      <hemisphereLight args={["#cfd8ff", "#232741", 0.22]} />
       <directionalLight
-        position={[14, 22, 8]}
-        intensity={1.35}
+        position={[14, 22, 10]}
+        intensity={1.55}
+        color="#fff2e0"
         castShadow
         shadow-mapSize={[2048, 2048]}
-        shadow-camera-left={-26}
-        shadow-camera-right={26}
-        shadow-camera-top={26}
-        shadow-camera-bottom={-26}
+        shadow-camera-left={-27}
+        shadow-camera-right={27}
+        shadow-camera-top={27}
+        shadow-camera-bottom={-27}
+        shadow-bias={-0.0002}
+        shadow-normalBias={0.02}
       />
-      <directionalLight position={[-10, 8, -14]} intensity={0.25} color="#8fa3ff" />
+      <directionalLight position={[-12, 9, -14]} intensity={0.25} color="#8fa3ff" />
 
-      {/* diorama platform */}
-      <mesh position={[0, -0.65, 0]}>
-        <boxGeometry args={[41.5, 1.3, 30.5]} />
-        <meshStandardMaterial color="#171a28" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, -0.05, -0.25]} receiveShadow>
-        <boxGeometry args={[40, 0.12, 29.5]} />
-        <meshStandardMaterial color="#e7e9f2" roughness={0.95} />
-      </mesh>
+      <Environment resolution={128} frames={1}>
+        <Lightformer intensity={1.0} position={[0, 10, 0]} scale={[12, 12, 1]} rotation-x={Math.PI / 2} color="#ffffff" />
+        <Lightformer intensity={0.5} position={[-10, 5, -8]} scale={[10, 4, 1]} color="#b7c6ff" />
+        <Lightformer intensity={0.6} position={[10, 5, 8]} rotation-y={Math.PI} scale={[10, 4, 1]} color="#ffd9b8" />
+      </Environment>
 
+      <Floor />
+      <Walls />
+      <ContactShadows
+        position={[0, 0.045, -0.25]}
+        scale={[44, 33]}
+        opacity={0.62}
+        blur={1.7}
+        far={10}
+        resolution={1024}
+        frames={Infinity}
+        color="#1a2140"
+      />
       <RoomPlates />
 
       <FinanceRoom position={roomPos.finance} />
@@ -240,16 +415,29 @@ export default function OfficeScene() {
 
       {/* center decor */}
       <SecurityGate position={[0, 0, 5.4]} />
-      <Desk position={[-4.5, 0, 0]} rotation={0.8} />
-      <Desk position={[4.5, 0, -1]} rotation={-0.8} />
-      <Whiteboard position={[-1.5, 0, -5.5]} rotation={0.2} />
-      <Plant position={[-8.5, 0, 2.5]} />
-      <Plant position={[8.5, 0, 2.5]} />
-      <Plant position={[-9, 0, -5]} />
+      <Lounge position={[5.6, 0, 3.2]} rotation={-0.35} />
+      <CoffeeBar position={[-8.2, 0, 8]} rotation={0.5} />
+      <Desk position={[-5.2, 0, -1.2]} rotation={Math.PI / 2} />
+      <Desk position={[-5.2, 0, 1.2]} rotation={-Math.PI / 2} />
+      <Desk position={[-8.2, 0, -1.2]} rotation={Math.PI / 2} />
+      <Desk position={[-8.2, 0, 1.2]} rotation={-Math.PI / 2} />
+      <Whiteboard position={[-2, 0, -6]} rotation={0.2} />
+      <Plant position={[-10.5, 0, 0]} />
+      <Plant position={[2.8, 0, 5.8]} />
+      <Plant position={[-2.9, 0, 5.8]} />
       <Plant position={[9.5, 0, 11]} />
+      <Plant position={[-19.3, 0, -13.4]} />
+      <Plant position={[18.5, 0, 12.3]} />
 
       <Player />
       <OtherPlayers />
+
+      <EffectComposer multisampling={0}>
+        <N8AO halfRes intensity={2.2} aoRadius={1.3} distanceFalloff={1} quality="performance" />
+        <Bloom mipmapBlur intensity={0.5} luminanceThreshold={1.1} luminanceSmoothing={0.2} />
+        <BrightnessContrast brightness={0.01} contrast={0.11} />
+        <Vignette eskil={false} offset={0.1} darkness={0.5} />
+      </EffectComposer>
     </>
   );
 }

@@ -43,6 +43,9 @@ a module.
 
 - **Client**: Vite + React + TypeScript, three.js via @react-three/fiber
   (isometric orthographic camera, WASD movement, animated props), zustand.
+  Rendering: procedural environment lighting, contact + blob shadows, and an
+  N8AO + bloom + vignette post stack. Typography is bundled (Archivo Black
+  display, Space Grotesk UI, JetBrains Mono micro-labels) — no CDN fetches.
 - **Server**: Express + better-sqlite3 (WAL), JWT auth, `ws` for presence/games,
   Google Sheets REST with a hand-rolled service-account JWT (no SDK).
 - **Design**: charts follow a CVD-validated palette (cobalt `#2447f0` /
