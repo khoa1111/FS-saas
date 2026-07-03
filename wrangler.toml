@@ -1,0 +1,21 @@
+name = "felic-studio-os"
+compatibility_date = "2026-07-03"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+# Static 3D React client deploys to Cloudflare Pages/Workers assets.
+# The current Express + SQLite realtime API remains runnable via `npm start`;
+# use docs/cloudflare-deployment.md for the planned D1/R2/Durable Objects cutover.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "felic-studio-os"
+database_id = "replace-with-cloudflare-d1-id"
+
+[[r2_buckets]]
+binding = "ASSETS_BUCKET"
+bucket_name = "felic-studio-assets"
+
+[vars]
+APP_NAME = "Felic Studio OS"
+INVITE_ORIGIN = "https://felic-studio-os.pages.dev"

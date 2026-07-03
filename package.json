@@ -10,7 +10,9 @@
     "dev:client": "vite",
     "build": "vite build && tsc -p tsconfig.server.json --noEmit",
     "start": "NODE_ENV=production tsx server/index.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "build:cloudflare": "npm run build",
+    "deploy:cloudflare": "npm run build && npx wrangler pages deploy dist --project-name felic-studio-os"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.2.8",

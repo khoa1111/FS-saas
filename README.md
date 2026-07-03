@@ -72,3 +72,23 @@ via your profile after first login). Other env vars: `PORT`, `JWT_SECRET`,
 - **E** — work at the highlighted room
 - **ESC** — close the module window
 - chat box (bottom right) — talk to the office
+
+## Cloudflare hosting path
+
+This repo now includes a Cloudflare deployment scaffold:
+
+- `wrangler.toml` publishes the Vite build output in `dist` and declares bindings for D1 (`DB`) and R2 (`ASSETS_BUCKET`).
+- `cloudflare/d1-schema.sql` mirrors the local SQLite business tables for D1 bootstrap.
+- `docs/cloudflare-deployment.md` documents the Worker/Pages, D1, R2, Durable Objects, and Google Sheets migration plan.
+
+Static client deployment starts with:
+
+```bash
+npm run build
+npx wrangler d1 create felic-studio-os
+npx wrangler d1 execute felic-studio-os --file cloudflare/d1-schema.sql --remote
+npx wrangler r2 bucket create felic-studio-assets
+npx wrangler pages deploy dist --project-name felic-studio-os
+```
+
+The existing Express server remains available for local/full-stack operation while the API is ported to Workers.
