@@ -69,9 +69,15 @@ async function sign(value: string, secret: string) {
   return base64Url(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value)));
 }
 
+function getAuthSecret(env: Env) {
+  return env.JWT_SECRET || env.ADMIN_PASSWORD || null;
+}
+
 async function makeToken(user: SessionUser, env: Env) {
+  const secret = getAuthSecret(env);
+  if (!secret) throw new Error("ADMIN_PASSWORD is required for Worker authentication");
   const payload = base64Url(new TextEncoder().encode(JSON.stringify({ sub: user.id, email: user.email, iat: Date.now() })));
-  const sig = await sign(payload, env.JWT_SECRET || env.ADMIN_PASSWORD || "felic-worker-dev-secret");
+  const sig = await sign(payload, secret);
   return `${payload}.${sig}`;
 }
 
@@ -80,7 +86,9 @@ async function verifyToken(request: Request, env: Env) {
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return null;
-  const expected = await sign(payload, env.JWT_SECRET || env.ADMIN_PASSWORD || "felic-worker-dev-secret");
+  const secret = getAuthSecret(env);
+  if (!secret) return null;
+  const expected = await sign(payload, secret);
   if (sig !== expected) return null;
   try {
     const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))) as { email?: string };
@@ -100,7 +108,10 @@ async function handleApi(request: Request, env: Env) {
   if (path === "/auth/login" && request.method === "POST") {
     const body = (await request.json().catch(() => ({}))) as { email?: string; password?: string };
     const expectedEmail = (env.ADMIN_EMAIL || "admin@felic.studio").toLowerCase().trim();
-    const expectedPassword = env.ADMIN_PASSWORD || "felic-admin";
+    const expectedPassword = env.ADMIN_PASSWORD;
+    if (!expectedPassword) {
+      return json({ error: "ADMIN_PASSWORD is required for Worker login" }, { status: 503 });
+    }
     if ((body.email || "").toLowerCase().trim() !== expectedEmail || body.password !== expectedPassword) {
       return json({ error: "Wrong email or password" }, { status: 401 });
     }

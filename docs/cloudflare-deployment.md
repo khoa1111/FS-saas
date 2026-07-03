@@ -5,7 +5,7 @@ Felic Studio OS is designed as a sim-office SaaS: Vite/React renders the 3D offi
 ## Current deployable surface
 
 - `wrangler.toml` deploys the built React office from `dist` with Cloudflare Workers Static Assets.
-- `src/worker.ts` serves static assets, supports temporary admin login from `ADMIN_EMAIL` / `ADMIN_PASSWORD`, returns a minimal `/api/summary`, and keeps clear `501` placeholders for data-writing APIs and `/ws` until the backend is ported.
+- `src/worker.ts` serves static assets, supports temporary admin login from `ADMIN_EMAIL` / required `ADMIN_PASSWORD`, returns a minimal `/api/summary`, and keeps clear `501` placeholders for data-writing APIs and `/ws` until the backend is ported.
 - `cloudflare/d1-schema.sql` mirrors the local SQLite schema so the business data model is ready for Cloudflare D1.
 - R2 is reserved for uploaded documents and production creative assets; add the `ASSETS_BUCKET` binding after the bucket exists.
 
@@ -47,6 +47,7 @@ npx wrangler r2 bucket create felic-studio-assets
 After creating D1/R2, configure the real D1 and R2 bindings in the Cloudflare dashboard or extend `wrangler.toml` with actual resource IDs. Store sensitive values with Wrangler secrets rather than committing them:
 
 ```bash
+npx wrangler secret put ADMIN_PASSWORD
 npx wrangler secret put JWT_SECRET
 npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON
 ```
