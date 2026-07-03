@@ -72,3 +72,40 @@ via your profile after first login). Other env vars: `PORT`, `JWT_SECRET`,
 - **E** — work at the highlighted room
 - **ESC** — close the module window
 - chat box (bottom right) — talk to the office
+
+## Cloudflare hosting path
+
+If Cloudflare asks for both a build command and a deploy command, use the Workers Static Assets flow:
+
+```bash
+# Build command
+npm run build
+
+# Deploy command
+npx wrangler deploy
+
+# Non-production branch deploy command
+npx wrangler versions upload
+```
+
+Use `/` as the path/root directory. The `wrangler.toml` file points Wrangler at the Vite output in `dist` and serves it as a single-page app.
+The project declares Vite `^6.0.0` because Cloudflare Workers automatic configuration rejects Vite 5.x.
+
+Do **not** paste D1/R2 provisioning commands into build or deploy commands; those are one-time setup steps and will fail on later builds when resources already exist.
+
+This repo includes a Cloudflare deployment scaffold:
+
+- `wrangler.toml` deploys the static 3D React client with Workers Static Assets.
+- `src/worker.ts` serves built assets and returns a clear placeholder for `/api/*` and `/ws` until the backend migration is complete.
+- `cloudflare/d1-schema.sql` mirrors the local SQLite business tables for D1 bootstrap.
+- `docs/cloudflare-deployment.md` documents the Workers, D1, R2, Durable Objects, and Google Sheets migration plan.
+
+Run one-time provisioning locally or in an authenticated admin terminal, then add the real resource IDs/bindings in Cloudflare:
+
+```bash
+npx wrangler d1 create felic-studio-os
+npx wrangler d1 execute felic-studio-os --file cloudflare/d1-schema.sql --remote
+npx wrangler r2 bucket create felic-studio-assets
+```
+
+The existing Express server remains available for local/full-stack operation while the API is ported to Workers.
