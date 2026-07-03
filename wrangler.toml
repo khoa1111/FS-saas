@@ -1,0 +1,16 @@
+name = "felic-studio-os"
+main = "src/worker.ts"
+compatibility_date = "2026-07-03"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# Cloudflare Workers build settings:
+#   Build command: npm run build
+#   Deploy command: npx wrangler deploy
+#   Non-production branch deploy command: npx wrangler versions upload
+#
+# Do not run one-time provisioning commands (D1 create, R2 create, schema import)
+# as build or deploy commands. Configure D1/R2 bindings after provisioning them.
