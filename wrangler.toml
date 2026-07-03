@@ -10,7 +10,7 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "felic-studio-os"
-database_id = "replace-with-cloudflare-d1-id"
+database_id = "f8665383-3f14-4be0-9f48-81fe68fad016"
 
 [[r2_buckets]]
 binding = "ASSETS_BUCKET"
